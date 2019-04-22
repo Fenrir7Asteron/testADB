@@ -149,7 +149,7 @@ router.patch(':key', function (req, res) {
     .response(IsAppointed, 'The updated isAppointed.')
     .summary('Update an isAppointed')
     .description(dd`
-  Patches an isAppointed with the request body andf
+  Patches an isAppointed with the request body and
   returns the updated document.
 `);
 
