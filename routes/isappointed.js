@@ -7,9 +7,9 @@ const errors = require('@arangodb').errors;
 const createRouter = require('@arangodb/foxx/router');
 const IsAppointed = require('../models/isappointed');
 
-const isAssignedItems = module.context.collection('isAssigned');
+const isAppointedItems = module.context.collection('isAppointed');
 const keySchema = joi.string().required()
-    .description('The key of the isAssigned');
+    .description('The key of the isAppointed');
 
 const ARANGO_NOT_FOUND = errors.ERROR_ARANGO_DOCUMENT_NOT_FOUND.code;
 const ARANGO_DUPLICATE = errors.ERROR_ARANGO_UNIQUE_CONSTRAINT_VIOLATED.code;
@@ -21,7 +21,7 @@ const router = createRouter();
 module.exports = router;
 
 
-router.tag('isAssigned');
+router.tag('isAppointed');
 
 
 const NewIsAppointed = Object.assign({}, IsAppointed, {
@@ -35,7 +35,7 @@ const NewIsAppointed = Object.assign({}, IsAppointed, {
 
 router.get(function (req, res) {
     if (!hasPerm(req.user._id, permission.appointments.view)) res.throw(403, 'Not authorized');
-    res.send(isAssignedItems.all());
+    res.send(isAppointedItems.all());
 }, 'list')
     .response([IsAppointed], 'A list of isAppointedItems.')
     .summary('List all isAppointedItems')
@@ -46,29 +46,29 @@ router.get(function (req, res) {
 
 router.post(function (req, res) {
     if (!hasPerm(req.user._id, permission.appointments.create)) res.throw(403, 'Not authorized');
-    const isAssigned = req.body;
+    const isAppointed = req.body;
     let meta;
     try {
-        meta = isAssignedItems.save(isAssigned._from, isAssigned._to, isAssigned);
+        meta = isAppointedItems.save(isAppointed._from, isAppointed._to, isAppointed);
     } catch (e) {
         if (e.isArangoError && e.errorNum === ARANGO_DUPLICATE) {
             throw httpError(HTTP_CONFLICT, e.message);
         }
         throw e;
     }
-    Object.assign(isAssigned, meta);
+    Object.assign(isAppointed, meta);
     res.status(201);
     res.set('location', req.makeAbsolute(
-        req.reverse('detail', {key: isAssigned._key})
+        req.reverse('detail', {key: isAppointed._key})
     ));
-    res.send(isAssigned);
+    res.send(isAppointed);
 }, 'create')
-    .body(NewIsAppointed, 'The isAssigned to create.')
-    .response(201, IsAppointed, 'The created isAssigned.')
-    .error(HTTP_CONFLICT, 'The isAssigned already exists.')
-    .summary('Create a new isAssigned')
+    .body(NewIsAppointed, 'The isAppointed to create.')
+    .response(201, IsAppointed, 'The created isAppointed.')
+    .error(HTTP_CONFLICT, 'The isAppointed already exists.')
+    .summary('Create a new isAppointed')
     .description(dd`
-  Creates a new isAssigned from the request body and
+  Creates a new isAppointed from the request body and
   returns the saved document.
 `);
 
@@ -76,32 +76,32 @@ router.post(function (req, res) {
 router.get(':key', function (req, res) {
     if (!hasPerm(req.user._id, permission.appointments.view)) res.throw(403, 'Not authorized');
     const key = req.pathParams.key;
-    let isAssigned;
+    let isAppointed;
     try {
-        isAssigned = isAssignedItems.document(key);
+        isAppointed = isAppointedItems.document(key);
     } catch (e) {
         if (e.isArangoError && e.errorNum === ARANGO_NOT_FOUND) {
             throw httpError(HTTP_NOT_FOUND, e.message);
         }
         throw e;
     }
-    res.send(isAssigned);
+    res.send(isAppointed);
 }, 'detail')
     .pathParam('key', keySchema)
-    .response(IsAppointed, 'The isAssigned.')
-    .summary('Fetch an isAssigned')
+    .response(IsAppointed, 'The isAppointed.')
+    .summary('Fetch an isAppointed')
     .description(dd`
-  Retrieves an isAssigned by its key.
+  Retrieves an isAppointed by its key.
 `);
 
 
 router.put(':key', function (req, res) {
     if (!hasPerm(req.user._id, permission.appointments.edit)) res.throw(403, 'Not authorized');
     const key = req.pathParams.key;
-    const isAssigned = req.body;
+    const isAppointed = req.body;
     let meta;
     try {
-        meta = isAssignedItems.replace(key, isAssigned);
+        meta = isAppointedItems.replace(key, isAppointed);
     } catch (e) {
         if (e.isArangoError && e.errorNum === ARANGO_NOT_FOUND) {
             throw httpError(HTTP_NOT_FOUND, e.message);
@@ -111,15 +111,15 @@ router.put(':key', function (req, res) {
         }
         throw e;
     }
-    Object.assign(isAssigned, meta);
-    res.send(isAssigned);
+    Object.assign(isAppointed, meta);
+    res.send(isAppointed);
 }, 'replace')
     .pathParam('key', keySchema)
-    .body(IsAppointed, 'The data to replace the isAssigned with.')
-    .response(IsAppointed, 'The new isAssigned.')
-    .summary('Replace an isAssigned')
+    .body(IsAppointed, 'The data to replace the isAppointed with.')
+    .response(IsAppointed, 'The new isAppointed.')
+    .summary('Replace an isAppointed')
     .description(dd`
-  Replaces an existing isAssigned with the request body and
+  Replaces an existing isAppointed with the request body and
   returns the new document.
 `);
 
@@ -129,10 +129,10 @@ router.patch(':key', function (req, res) {
     const appointmentId = `${appointments.name()}/${key}`;
     if (!hasPerm(req.user._id, permission.appointments.edit, appointmentId)) res.throw(403, 'Not authorized');
     const patchData = req.body;
-    let isAssigned;
+    let isAppointed;
     try {
-        isAssignedItems.update(key, patchData);
-        isAssigned = isAssignedItems.document(key);
+        isAppointedItems.update(key, patchData);
+        isAppointed = isAppointedItems.document(key);
     } catch (e) {
         if (e.isArangoError && e.errorNum === ARANGO_NOT_FOUND) {
             throw httpError(HTTP_NOT_FOUND, e.message);
@@ -142,14 +142,14 @@ router.patch(':key', function (req, res) {
         }
         throw e;
     }
-    res.send(isAssigned);
+    res.send(isAppointed);
 }, 'update')
     .pathParam('key', keySchema)
-    .body(joi.object().description('The data to update the isAssigned with.'))
-    .response(IsAppointed, 'The updated isAssigned.')
-    .summary('Update an isAssigned')
+    .body(joi.object().description('The data to update the isAppointed with.'))
+    .response(IsAppointed, 'The updated isAppointed.')
+    .summary('Update an isAppointed')
     .description(dd`
-  Patches an isAssigned with the request body and
+  Patches an isAppointed with the request body and
   returns the updated document.
 `);
 
@@ -158,7 +158,7 @@ router.delete(':key', function (req, res) {
     if (!hasPerm(req.user._id, permission.appointments.delete)) res.throw(403, 'Not authorized');
     const key = req.pathParams.key;
     try {
-        isAssignedItems.remove(key);
+        isAppointedItems.remove(key);
     } catch (e) {
         if (e.isArangoError && e.errorNum === ARANGO_NOT_FOUND) {
             throw httpError(HTTP_NOT_FOUND, e.message);
@@ -168,7 +168,7 @@ router.delete(':key', function (req, res) {
 }, 'delete')
     .pathParam('key', keySchema)
     .response(null)
-    .summary('Remove a isAssigned')
+    .summary('Remove a isAppointed')
     .description(dd`
-  Deletes a isAssigned from the database.
+  Deletes a isAppointed from the database.
 `);
