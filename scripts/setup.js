@@ -15,7 +15,7 @@ const documentCollections = [
 const edgeCollections = [
   "hasPerm",
   "memberOf",
-  "isAssigned"
+  "isAppointed"
 ];
 
 for (const localName of documentCollections) {
