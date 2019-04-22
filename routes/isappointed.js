@@ -6,6 +6,8 @@ const status = require('statuses');
 const errors = require('@arangodb').errors;
 const createRouter = require('@arangodb/foxx/router');
 const IsAppointed = require('../models/isappointed');
+const hasPerm = require('../util/hasPerm');
+const permission = require('../util/permissions');
 
 const isAppointedItems = module.context.collection('isAppointed');
 const keySchema = joi.string().required()
