@@ -35,8 +35,7 @@ const NewIsAppointed = Object.assign({}, IsAppointed, {
 
 
 
-router.get(function (req, res) {
-    if (!hasPerm(req.user._id, permission.appointments.view)) res.throw(403, 'Not authorized');
+router.get(restrict(permission.appointments.view), function (req, res) {
     res.send(isAppointedItems.all());
 }, 'list')
     .response([IsAppointed], 'A list of isAppointedItems.')
@@ -46,8 +45,7 @@ router.get(function (req, res) {
 `);
 
 
-router.post(function (req, res) {
-    if (!hasPerm(req.user._id, permission.appointments.create)) res.throw(403, 'Not authorized');
+router.post(restrict(permission.appointments.create), function (req, res) {
     const isAppointed = req.body;
     let meta;
     try {
@@ -76,7 +74,7 @@ router.post(function (req, res) {
 
 
 router.get(':key', function (req, res) {
-    if (!hasPerm(req.user._id, permission.appointments.view)) res.throw(403, 'Not authorized');
+    if (!hasPerm(req.user, permission.appointments.view)) res.throw(403, 'Not authorized');
     const key = req.pathParams.key;
     let isAppointed;
     try {
@@ -98,7 +96,7 @@ router.get(':key', function (req, res) {
 
 
 router.put(':key', function (req, res) {
-    if (!hasPerm(req.user._id, permission.appointments.edit)) res.throw(403, 'Not authorized');
+    if (!hasPerm(req.user, permission.appointments.edit)) res.throw(403, 'Not authorized');
     const key = req.pathParams.key;
     const isAppointed = req.body;
     let meta;
@@ -129,7 +127,7 @@ router.put(':key', function (req, res) {
 router.patch(':key', function (req, res) {
     const key = req.pathParams.key;
     const appointmentId = `${appointments.name()}/${key}`;
-    if (!hasPerm(req.user._id, permission.appointments.edit, appointmentId)) res.throw(403, 'Not authorized');
+    if (!hasPerm(req.user, permission.appointments.edit, appointmentId)) res.throw(403, 'Not authorized');
     const patchData = req.body;
     let isAppointed;
     try {
@@ -157,7 +155,7 @@ router.patch(':key', function (req, res) {
 
 
 router.delete(':key', function (req, res) {
-    if (!hasPerm(req.user._id, permission.appointments.delete)) res.throw(403, 'Not authorized');
+    if (!hasPerm(req.user, permission.appointments.delete)) res.throw(403, 'Not authorized');
     const key = req.pathParams.key;
     try {
         isAppointedItems.remove(key);
